@@ -1,0 +1,8 @@
+/Users/osama.alarify/Desktop/mini-credit-service/src/main/java/com/credit/model/Customer.java
+/Users/osama.alarify/Desktop/mini-credit-service/src/main/java/com/credit/repository/CustomerRepository.java
+/Users/osama.alarify/Desktop/mini-credit-service/src/main/java/com/credit/exception/CustomerNotFoundException.java
+/Users/osama.alarify/Desktop/mini-credit-service/src/main/java/com/credit/config/DataInitializer.java
+/Users/osama.alarify/Desktop/mini-credit-service/src/main/java/com/credit/service/CustomerService.java
+/Users/osama.alarify/Desktop/mini-credit-service/src/main/java/com/credit/MiniCreditServiceApplication.java
+/Users/osama.alarify/Desktop/mini-credit-service/src/main/java/com/credit/exception/DuplicateEmailException.java
+/Users/osama.alarify/Desktop/mini-credit-service/src/main/java/com/credit/controller/CustomerController.java
