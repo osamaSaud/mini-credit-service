@@ -2,11 +2,6 @@
 
 A Spring Boot application that manages customers, credit scores, and credit risk calculations.
 
-## Prerequisites
-
-- Java 17 or higher
-- Maven 3.6 or higher
-
 ## Running the Application
 
 1. Clone the repository:
