@@ -32,6 +32,10 @@ build/
 ### VS Code ###
 .vscode/
 
+### Application Properties ###
+src/main/resources/application-prod.properties
+src/main/resources/application-dev.properties
+
 ### H2 Database ###
 *.db
 *.trace.db 

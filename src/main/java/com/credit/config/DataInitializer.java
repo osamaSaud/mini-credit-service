@@ -18,8 +18,11 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        // Clear existing data
-        customerRepository.deleteAll();
+        // Check if data already exists
+        if (customerRepository.count() > 0) {
+            System.out.println("Database already contains data. Skipping initialization.");
+            return;
+        }
 
         // Create sample customers with varying credit scores and salaries
         Customer customer1 = new Customer();

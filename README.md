@@ -1,22 +1,42 @@
 # Mini Credit Service
 
-A Spring Boot application that manages customers, credit scores, and credit risk calculations.
+A Spring Boot application for managing customer credit information.
+
+## Prerequisites
+
+- Java 11 or higher
+- Maven 3.6 or higher
+- MySQL 8.0 or higher
+
+## Environment Setup
+
+1. Copy the application properties template:
+   ```bash
+   cp src/main/resources/application.properties.template src/main/resources/application.properties
+   ```
+
+2. Set up environment variables (recommended) or update application.properties directly:
+   ```bash
+   export MYSQL_USERNAME=your_username
+   export MYSQL_PASSWORD=your_password
+   ```
+
+   Note: If environment variables are not set, the application will use default values from application.properties.
 
 ## Running the Application
 
 1. Clone the repository:
-   ```
+   ```bash
    git clone <repository-url>
-   cd mini-credit-service
    ```
 
 2. Build the project:
-   ```
+   ```bash
    mvn clean install
    ```
 
 3. Run the application:
-   ```
+   ```bash
    mvn spring-boot:run
    ```
 
