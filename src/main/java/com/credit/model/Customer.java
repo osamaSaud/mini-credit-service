@@ -1,16 +1,11 @@
 package com.credit.model;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import lombok.Data;
+import javax.persistence.*;
+import javax.validation.constraints.*;
 
 @Entity
+@Table(name = "customers")
 @Data
 public class Customer {
     @Id
@@ -23,16 +18,17 @@ public class Customer {
     @NotBlank(message = "Last name is required")
     private String lastName;
 
-    @Email(message = "Invalid email format")
     @NotBlank(message = "Email is required")
+    @Email(message = "Invalid email format")
+    @Column(unique = true)
     private String email;
 
-    @NotNull(message = "Credit score is required")
     @Min(value = 300, message = "Credit score must be at least 300")
+    @Max(value = 850, message = "Credit score cannot exceed 850")
     private Integer creditScore;
 
     @NotNull(message = "Annual salary is required")
-    @Min(value = 0, message = "Annual salary must be positive")
+    @Min(value = 0, message = "Annual salary cannot be negative")
     private Double annualSalary;
 
     private Double creditRiskScore;
