@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mini-credit-service
+  labels:
+    app: mini-credit-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mini-credit-service
+  template:
+    metadata:
+      labels:
+        app: mini-credit-service
+    spec:
+      containers:
+      - name: mini-credit-service
+        image: osamasaud1/mini-credit-service:latest
+        ports:
+        - containerPort: 8081
+        env:
+        - name: SPRING_DATASOURCE_URL
+          value: jdbc:mysql://mysql:3306/credit_service_dev2?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+        - name: SPRING_DATASOURCE_USERNAME
+          value: root
+        - name: SPRING_DATASOURCE_PASSWORD
+          value: Aa123456
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "200m"
+            memory: "256Mi" 

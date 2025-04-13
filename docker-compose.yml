@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  app:
+    image: osamasaud1/mini-credit-service:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mini-credit-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mysql
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/credit_service_dev2?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=Aa123456
+    restart: always
+    networks:
+      - credit-network
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: Aa123456
+      MYSQL_DATABASE: credit_service_dev2
+    volumes:
+      - mysql-data:/var/lib/mysql
+    restart: always
+    networks:
+      - credit-network
+
+volumes:
+  mysql-data:
+
+networks:
+  credit-network:
+    driver: bridge 
