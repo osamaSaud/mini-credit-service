@@ -3,6 +3,7 @@
 /Users/osama.alarify/Desktop/mini-credit-service/src/main/java/com/credit/service/SalaryCertificateService.java
 /Users/osama.alarify/Desktop/mini-credit-service/src/main/java/com/credit/exception/ErrorDetails.java
 /Users/osama.alarify/Desktop/mini-credit-service/src/main/java/com/credit/model/SalaryCertificateResponse.java
+/Users/osama.alarify/Desktop/mini-credit-service/src/main/java/com/credit/controller/FlywayController.java
 /Users/osama.alarify/Desktop/mini-credit-service/src/main/java/com/credit/model/SalaryCertificate.java
 /Users/osama.alarify/Desktop/mini-credit-service/src/main/java/com/credit/controller/CustomerController.java
 /Users/osama.alarify/Desktop/mini-credit-service/src/main/java/com/credit/controller/SalaryCertificateController.java

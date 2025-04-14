@@ -3,6 +3,7 @@ package com.credit.model;
 import lombok.Data;
 import javax.persistence.*;
 import javax.validation.constraints.*;
+import java.util.List;
 
 @Entity
 @Table(name = "customers")
@@ -23,6 +24,8 @@ public class Customer {
     @Column(unique = true)
     private String email;
 
+    private String phoneNumber;
+
     @Min(value = 300, message = "Credit score must be at least 300")
     @Max(value = 850, message = "Credit score cannot exceed 850")
     private Integer creditScore;
@@ -32,4 +35,7 @@ public class Customer {
     private Double annualSalary;
 
     private Double creditRiskScore;
+    
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
+    private List<SalaryCertificate> salaryCertificates;
 } 

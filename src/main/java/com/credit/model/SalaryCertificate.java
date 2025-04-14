@@ -32,6 +32,10 @@ public class SalaryCertificate {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @ManyToOne
+    @JoinColumn(name = "customer_id")
+    private Customer customer;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

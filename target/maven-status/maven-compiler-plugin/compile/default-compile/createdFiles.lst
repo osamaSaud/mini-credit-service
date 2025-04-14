@@ -17,6 +17,7 @@ com/credit/exception/ResourceNotFoundException.class
 com/credit/model/SalaryCertificateRequest.class
 com/credit/model/SalaryCertificate.class
 com/credit/controller/CustomerController.class
+com/credit/controller/FlywayController.class
 com/credit/controller/SalaryCertificateController.class
 com/credit/model/Customer.class
 com/credit/service/CustomerService.class

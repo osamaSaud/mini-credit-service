@@ -23,6 +23,7 @@ COPY --from=build /app/target/*.jar app.jar
 ENV SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/credit_service_dev2?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
 ENV SPRING_DATASOURCE_USERNAME=root
 ENV SPRING_DATASOURCE_PASSWORD=Aa123456
+ENV SPRING_MAIN_ALLOW_BEAN_DEFINITION_OVERRIDING=true
 
 # Expose the application port
 EXPOSE 8081
