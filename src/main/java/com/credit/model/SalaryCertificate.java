@@ -1,13 +1,21 @@
 package com.credit.model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.Data;
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "salary_certificates")
 @Data
-public class SalaryCertificate {
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+public class SalaryCertificate implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -34,10 +42,21 @@ public class SalaryCertificate {
 
     @ManyToOne
     @JoinColumn(name = "customer_id")
+    @JsonIgnoreProperties("salaryCertificates")
     private Customer customer;
 
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
+    }
+    
+    @Override
+    public String toString() {
+        return "SalaryCertificate{" +
+                "id=" + id +
+                ", fullName='" + fullName + '\'' +
+                ", employerName='" + employerName + '\'' +
+                ", createdAt=" + createdAt +
+                '}';
     }
 } 

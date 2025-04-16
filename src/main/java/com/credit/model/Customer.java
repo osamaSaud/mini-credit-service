@@ -1,14 +1,23 @@
 package com.credit.model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.Data;
 import javax.persistence.*;
 import javax.validation.constraints.*;
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "customers")
 @Data
-public class Customer {
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+public class Customer implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -37,5 +46,19 @@ public class Customer {
     private Double creditRiskScore;
     
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
-    private List<SalaryCertificate> salaryCertificates;
+    @JsonIgnoreProperties("customer")
+    private List<SalaryCertificate> salaryCertificates = new ArrayList<>();
+    
+    @Override
+    public String toString() {
+        return "Customer{" +
+                "id=" + id +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", email='" + email + '\'' +
+                ", creditScore=" + creditScore +
+                ", annualSalary=" + annualSalary +
+                ", creditRiskScore=" + creditRiskScore +
+                '}';
+    }
 } 

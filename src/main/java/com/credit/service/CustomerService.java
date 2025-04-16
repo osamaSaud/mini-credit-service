@@ -1,22 +1,27 @@
 package com.credit.service;
 
 import com.credit.model.Customer;
+import com.credit.model.CustomerEvent;
 import com.credit.repository.CustomerRepository;
 import com.credit.exception.CustomerNotFoundException;
 import com.credit.exception.DuplicateEmailException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@Slf4j
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
+    private final MessagePublisherService messagePublisherService;
 
     @Autowired
-    public CustomerService(CustomerRepository customerRepository) {
+    public CustomerService(CustomerRepository customerRepository, MessagePublisherService messagePublisherService) {
         this.customerRepository = customerRepository;
+        this.messagePublisherService = messagePublisherService;
     }
 
     public List<Customer> getAllCustomers() {
@@ -33,7 +38,12 @@ public class CustomerService {
             throw new DuplicateEmailException("Email already exists: " + customer.getEmail());
         }
         calculateCreditRiskScore(customer);
-        return customerRepository.save(customer);
+        Customer savedCustomer = customerRepository.save(customer);
+        
+        // Publish customer created event
+        publishCustomerCreatedEvent(savedCustomer);
+        
+        return savedCustomer;
     }
 
     public Customer updateCustomer(Long id, Customer customerDetails) {
@@ -46,7 +56,12 @@ public class CustomerService {
         customer.setAnnualSalary(customerDetails.getAnnualSalary());
         
         calculateCreditRiskScore(customer);
-        return customerRepository.save(customer);
+        Customer updatedCustomer = customerRepository.save(customer);
+        
+        // Publish customer updated event
+        publishCustomerUpdatedEvent(updatedCustomer);
+        
+        return updatedCustomer;
     }
 
     public void deleteCustomer(Long id) {
@@ -54,6 +69,9 @@ public class CustomerService {
             throw new CustomerNotFoundException("Customer not found with id: " + id);
         }
         customerRepository.deleteById(id);
+        
+        // Publish customer deleted event
+        publishCustomerDeletedEvent(id);
     }
 
     private void calculateCreditRiskScore(Customer customer) {
@@ -67,5 +85,44 @@ public class CustomerService {
         double riskScore = 1.0 - ((normalizedCreditScore * creditScoreWeight) + (normalizedSalary * salaryWeight));
         
         customer.setCreditRiskScore(riskScore);
+    }
+    
+    /**
+     * Publish an event when a customer is created
+     */
+    private void publishCustomerCreatedEvent(Customer customer) {
+        try {
+            log.info("Publishing customer created event for customer ID: {}", customer.getId());
+            CustomerEvent event = CustomerEvent.customerCreated(customer);
+            messagePublisherService.publishCustomerEvent(event);
+        } catch (Exception e) {
+            log.error("Failed to publish customer created event", e);
+        }
+    }
+    
+    /**
+     * Publish an event when a customer is updated
+     */
+    private void publishCustomerUpdatedEvent(Customer customer) {
+        try {
+            log.info("Publishing customer updated event for customer ID: {}", customer.getId());
+            CustomerEvent event = CustomerEvent.customerUpdated(customer);
+            messagePublisherService.publishCustomerEvent(event);
+        } catch (Exception e) {
+            log.error("Failed to publish customer updated event", e);
+        }
+    }
+    
+    /**
+     * Publish an event when a customer is deleted
+     */
+    private void publishCustomerDeletedEvent(Long customerId) {
+        try {
+            log.info("Publishing customer deleted event for customer ID: {}", customerId);
+            CustomerEvent event = CustomerEvent.customerDeleted(customerId);
+            messagePublisherService.publishCustomerEvent(event);
+        } catch (Exception e) {
+            log.error("Failed to publish customer deleted event", e);
+        }
     }
 } 

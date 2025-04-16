@@ -9,10 +9,15 @@ services:
       - "8082:8082"
     depends_on:
       - mysql
+      - rabbitmq
     environment:
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/credit_service_dev2?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=Aa123456
+      - SPRING_RABBITMQ_HOST=mini-credit-rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=guest
+      - SPRING_RABBITMQ_PASSWORD=guest
     restart: always
     networks:
       - credit-network
@@ -31,8 +36,24 @@ services:
     networks:
       - credit-network
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: mini-credit-rabbitmq
+    ports:
+      - "5673:5672"  # RabbitMQ main port
+      - "15673:15672"  # RabbitMQ management interface
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    restart: always
+    networks:
+      - credit-network
+
 volumes:
   mysql-data:
+  rabbitmq-data:
 
 networks:
   credit-network:
