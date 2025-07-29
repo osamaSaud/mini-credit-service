@@ -1,8 +1,13 @@
 package com.credit.service;
 
-import com.credit.model.Customer;
+import com.credit.dto.CreateCustomerRequest;
+import com.credit.dto.UpdateCustomerRequest;
+import com.credit.dto.CustomerDTO;
+import com.credit.entity.CustomerEntity;
 import com.credit.model.CustomerEvent;
 import com.credit.repository.CustomerRepository;
+import com.credit.mapper.CustomerMapper;
+import com.credit.factory.CustomerEventFactory;
 import com.credit.exception.CustomerNotFoundException;
 import com.credit.exception.DuplicateEmailException;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +25,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+/**
+ * Updated test class for CustomerService using new DTO/Entity architecture
+ */
 @ExtendWith(MockitoExtension.class)
 class CustomerServiceTest {
 
@@ -29,47 +37,85 @@ class CustomerServiceTest {
     @Mock
     private MessagePublisherService messagePublisherService;
 
+    @Mock
+    private CustomerMapper customerMapper;
+
+    @Mock
+    private CustomerEventFactory eventFactory;
+
     @InjectMocks
     private CustomerService customerService;
 
-    private Customer testCustomer;
+    private CustomerEntity testEntity;
+    private CustomerDTO testDTO;
+    private CreateCustomerRequest createRequest;
+    private UpdateCustomerRequest updateRequest;
 
     @BeforeEach
     void setUp() {
-        testCustomer = new Customer();
-        testCustomer.setId(1L);
-        testCustomer.setFirstName("John");
-        testCustomer.setLastName("Doe");
-        testCustomer.setEmail("john.doe@example.com");
-        testCustomer.setCreditScore(750);
-        testCustomer.setAnnualSalary(80000.0);
+        // Setup test entity
+        testEntity = new CustomerEntity();
+        testEntity.setId(1L);
+        testEntity.setFirstName("John");
+        testEntity.setLastName("Doe");
+        testEntity.setEmail("john.doe@example.com");
+        testEntity.setCreditScore(750);
+        testEntity.setAnnualSalary(80000.0);
+
+        // Setup test DTO
+        testDTO = CustomerDTO.builder()
+                .id(1L)
+                .firstName("John")
+                .lastName("Doe")
+                .email("john.doe@example.com")
+                .creditScore(750)
+                .annualSalary(80000.0)
+                .build();
+
+        // Setup create request
+        createRequest = new CreateCustomerRequest();
+        createRequest.setFirstName("John");
+        createRequest.setLastName("Doe");
+        createRequest.setEmail("john.doe@example.com");
+        createRequest.setCreditScore(750);
+        createRequest.setAnnualSalary(80000.0);
+
+        // Setup update request
+        updateRequest = new UpdateCustomerRequest();
+        updateRequest.setFirstName("Jane");
+        updateRequest.setCreditScore(800);
     }
 
     @Test
-    void getAllCustomers_ShouldReturnListOfCustomers() {
+    void getAllCustomers_ShouldReturnListOfCustomerDTOs() {
         // Arrange
-        List<Customer> expectedCustomers = Arrays.asList(testCustomer);
-        when(customerRepository.findAll()).thenReturn(expectedCustomers);
+        List<CustomerEntity> entities = Arrays.asList(testEntity);
+        when(customerRepository.findAll()).thenReturn(entities);
+        when(customerMapper.toDTO(testEntity)).thenReturn(testDTO);
 
         // Act
-        List<Customer> actualCustomers = customerService.getAllCustomers();
+        List<CustomerDTO> actualCustomers = customerService.getAllCustomers();
 
         // Assert
-        assertEquals(expectedCustomers, actualCustomers);
+        assertEquals(1, actualCustomers.size());
+        assertEquals(testDTO, actualCustomers.get(0));
         verify(customerRepository).findAll();
+        verify(customerMapper).toDTO(testEntity);
     }
 
     @Test
-    void getCustomerById_WhenCustomerExists_ShouldReturnCustomer() {
+    void getCustomerById_WhenCustomerExists_ShouldReturnCustomerDTO() {
         // Arrange
-        when(customerRepository.findById(1L)).thenReturn(Optional.of(testCustomer));
+        when(customerRepository.findById(1L)).thenReturn(Optional.of(testEntity));
+        when(customerMapper.toDTO(testEntity)).thenReturn(testDTO);
 
         // Act
-        Customer foundCustomer = customerService.getCustomerById(1L);
+        CustomerDTO foundCustomer = customerService.getCustomerById(1L);
 
         // Assert
-        assertEquals(testCustomer, foundCustomer);
+        assertEquals(testDTO, foundCustomer);
         verify(customerRepository).findById(1L);
+        verify(customerMapper).toDTO(testEntity);
     }
 
     @Test
@@ -80,56 +126,63 @@ class CustomerServiceTest {
         // Act & Assert
         assertThrows(CustomerNotFoundException.class, () -> customerService.getCustomerById(1L));
         verify(customerRepository).findById(1L);
+        verify(customerMapper, never()).toDTO(any());
     }
 
     @Test
     void createCustomer_WhenEmailIsUnique_ShouldCreateCustomer() {
         // Arrange
-        when(customerRepository.existsByEmail(testCustomer.getEmail())).thenReturn(false);
-        when(customerRepository.save(any(Customer.class))).thenReturn(testCustomer);
+        when(customerRepository.existsByEmail(createRequest.getEmail())).thenReturn(false);
+        when(customerMapper.toEntity(createRequest)).thenReturn(testEntity);
+        when(customerRepository.save(any(CustomerEntity.class))).thenReturn(testEntity);
+        when(customerMapper.toDTO(testEntity)).thenReturn(testDTO);
+        when(eventFactory.createCustomerCreatedEvent(testEntity)).thenReturn(mock(CustomerEvent.class));
 
         // Act
-        Customer createdCustomer = customerService.createCustomer(testCustomer);
+        CustomerDTO createdCustomer = customerService.createCustomer(createRequest);
 
         // Assert
         assertNotNull(createdCustomer);
-        assertEquals(testCustomer, createdCustomer);
-        verify(customerRepository).existsByEmail(testCustomer.getEmail());
-        verify(customerRepository).save(testCustomer);
+        assertEquals(testDTO, createdCustomer);
+        verify(customerRepository).existsByEmail(createRequest.getEmail());
+        verify(customerMapper).toEntity(createRequest);
+        verify(customerRepository).save(any(CustomerEntity.class));
+        verify(customerMapper).toDTO(testEntity);
+        verify(eventFactory).createCustomerCreatedEvent(testEntity);
         verify(messagePublisherService).publishCustomerEvent(any(CustomerEvent.class));
     }
 
     @Test
     void createCustomer_WhenEmailExists_ShouldThrowException() {
         // Arrange
-        when(customerRepository.existsByEmail(testCustomer.getEmail())).thenReturn(true);
+        when(customerRepository.existsByEmail(createRequest.getEmail())).thenReturn(true);
 
         // Act & Assert
-        assertThrows(DuplicateEmailException.class, () -> customerService.createCustomer(testCustomer));
-        verify(customerRepository).existsByEmail(testCustomer.getEmail());
-        verify(customerRepository, never()).save(any(Customer.class));
+        assertThrows(DuplicateEmailException.class, () -> customerService.createCustomer(createRequest));
+        verify(customerRepository).existsByEmail(createRequest.getEmail());
+        verify(customerRepository, never()).save(any(CustomerEntity.class));
+        verify(messagePublisherService, never()).publishCustomerEvent(any());
     }
 
     @Test
     void updateCustomer_WhenCustomerExists_ShouldUpdateCustomer() {
         // Arrange
-        Customer updatedDetails = new Customer();
-        updatedDetails.setFirstName("Jane");
-        updatedDetails.setLastName("Smith");
-        updatedDetails.setEmail("jane.smith@example.com");
-        updatedDetails.setCreditScore(800);
-        updatedDetails.setAnnualSalary(90000.0);
-
-        when(customerRepository.findById(1L)).thenReturn(Optional.of(testCustomer));
-        when(customerRepository.save(any(Customer.class))).thenReturn(testCustomer);
+        when(customerRepository.findById(1L)).thenReturn(Optional.of(testEntity));
+        when(customerRepository.save(any(CustomerEntity.class))).thenReturn(testEntity);
+        when(customerMapper.toDTO(testEntity)).thenReturn(testDTO);
+        when(eventFactory.createHighValueCustomerEvent(testEntity)).thenReturn(mock(CustomerEvent.class));
 
         // Act
-        Customer updatedCustomer = customerService.updateCustomer(1L, updatedDetails);
+        CustomerDTO updatedCustomer = customerService.updateCustomer(1L, updateRequest);
 
         // Assert
         assertNotNull(updatedCustomer);
+        assertEquals(testDTO, updatedCustomer);
         verify(customerRepository).findById(1L);
-        verify(customerRepository).save(any(Customer.class));
+        verify(customerMapper).updateEntity(testEntity, updateRequest);
+        verify(customerRepository).save(testEntity);
+        verify(customerMapper).toDTO(testEntity);
+        verify(eventFactory).createHighValueCustomerEvent(testEntity);
         verify(messagePublisherService).publishCustomerEvent(any(CustomerEvent.class));
     }
 
@@ -137,6 +190,7 @@ class CustomerServiceTest {
     void deleteCustomer_WhenCustomerExists_ShouldDeleteCustomer() {
         // Arrange
         when(customerRepository.existsById(1L)).thenReturn(true);
+        when(eventFactory.createCustomerDeletedEvent(1L)).thenReturn(mock(CustomerEvent.class));
 
         // Act
         customerService.deleteCustomer(1L);
@@ -144,6 +198,7 @@ class CustomerServiceTest {
         // Assert
         verify(customerRepository).existsById(1L);
         verify(customerRepository).deleteById(1L);
+        verify(eventFactory).createCustomerDeletedEvent(1L);
         verify(messagePublisherService).publishCustomerEvent(any(CustomerEvent.class));
     }
 
@@ -156,5 +211,26 @@ class CustomerServiceTest {
         assertThrows(CustomerNotFoundException.class, () -> customerService.deleteCustomer(1L));
         verify(customerRepository).existsById(1L);
         verify(customerRepository, never()).deleteById(1L);
+        verify(messagePublisherService, never()).publishCustomerEvent(any());
+    }
+
+    @Test
+    void getAllCustomersWithFilters_ShouldReturnFilteredResults() {
+        // Arrange
+        List<CustomerEntity> entities = Arrays.asList(testEntity);
+        when(customerRepository.findCustomersWithFilters(
+                "John", null, 700, null, null, null)).thenReturn(entities);
+        when(customerMapper.toDTO(testEntity)).thenReturn(testDTO);
+
+        // Act
+        List<CustomerDTO> results = customerService.getAllCustomers(
+                "John", null, 700, null, null, null);
+
+        // Assert
+        assertEquals(1, results.size());
+        assertEquals(testDTO, results.get(0));
+        verify(customerRepository).findCustomersWithFilters(
+                "John", null, 700, null, null, null);
+        verify(customerMapper).toDTO(testEntity);
     }
 } 

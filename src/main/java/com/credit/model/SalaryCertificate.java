@@ -1,5 +1,6 @@
 package com.credit.model;
 
+import com.credit.entity.CustomerEntity;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -43,7 +44,7 @@ public class SalaryCertificate implements Serializable {
     @ManyToOne
     @JoinColumn(name = "customer_id")
     @JsonIgnoreProperties("salaryCertificates")
-    private Customer customer;
+    private CustomerEntity customer;
 
     @PrePersist
     protected void onCreate() {

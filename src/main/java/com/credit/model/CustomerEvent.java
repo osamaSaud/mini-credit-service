@@ -1,5 +1,6 @@
 package com.credit.model;
 
+import com.credit.entity.CustomerEntity;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -52,7 +53,7 @@ public class CustomerEvent implements Serializable {
     /**
      * Create a new customer created event
      */
-    public static CustomerEvent customerCreated(Customer customer) {
+    public static CustomerEvent customerCreated(CustomerEntity customer) {
         Map<String, Object> details = extractCustomerDetails(customer);
         
         return CustomerEvent.builder()
@@ -67,7 +68,7 @@ public class CustomerEvent implements Serializable {
     /**
      * Create a new customer updated event
      */
-    public static CustomerEvent customerUpdated(Customer customer) {
+    public static CustomerEvent customerUpdated(CustomerEntity customer) {
         Map<String, Object> details = extractCustomerDetails(customer);
         
         return CustomerEvent.builder()
@@ -94,7 +95,7 @@ public class CustomerEvent implements Serializable {
     /**
      * Extract basic customer details to avoid serialization issues
      */
-    private static Map<String, Object> extractCustomerDetails(Customer customer) {
+    private static Map<String, Object> extractCustomerDetails(CustomerEntity customer) {
         Map<String, Object> details = new HashMap<>();
         details.put("id", customer.getId());
         details.put("firstName", customer.getFirstName());

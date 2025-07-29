@@ -1,11 +1,16 @@
 package com.credit.config;
 
-import com.credit.model.Customer;
+import com.credit.entity.CustomerEntity;
+import com.credit.builder.CustomerEntityBuilder;
 import com.credit.repository.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+/**
+ * Data initializer that creates sample customers for testing and demonstration
+ * Now uses the new CustomerEntity and Builder pattern
+ */
 @Component
 public class DataInitializer implements CommandLineRunner {
 
@@ -24,56 +29,66 @@ public class DataInitializer implements CommandLineRunner {
             return;
         }
 
-        // Create sample customers with varying credit scores and salaries
-        Customer customer1 = new Customer();
-        customer1.setFirstName("John");
-        customer1.setLastName("Doe");
-        customer1.setEmail("john.doe@example.com");
-        customer1.setCreditScore(750);
-        customer1.setAnnualSalary(85000.0);
+        // Create sample customers using Builder pattern - much cleaner!
+        CustomerEntity customer1 = CustomerEntityBuilder.builder()
+                .withFirstName("John")
+                .withLastName("Doe")
+                .withEmail("john.doe@example.com")
+                .withCreditScore(750)
+                .withAnnualSalary(85000.0)
+                .withPhoneNumber("+1-555-0101")
+                .build();
         calculateCreditRiskScore(customer1);
         customerRepository.save(customer1);
 
-        Customer customer2 = new Customer();
-        customer2.setFirstName("Jane");
-        customer2.setLastName("Smith");
-        customer2.setEmail("jane.smith@example.com");
-        customer2.setCreditScore(680);
-        customer2.setAnnualSalary(65000.0);
+        CustomerEntity customer2 = CustomerEntityBuilder.builder()
+                .withFirstName("Jane")
+                .withLastName("Smith")
+                .withEmail("jane.smith@example.com")
+                .withCreditScore(680)
+                .withAnnualSalary(65000.0)
+                .withPhoneNumber("+1-555-0102")
+                .build();
         calculateCreditRiskScore(customer2);
         customerRepository.save(customer2);
 
-        Customer customer3 = new Customer();
-        customer3.setFirstName("Robert");
-        customer3.setLastName("Johnson");
-        customer3.setEmail("robert.johnson@example.com");
-        customer3.setCreditScore(620);
-        customer3.setAnnualSalary(55000.0);
+        CustomerEntity customer3 = CustomerEntityBuilder.builder()
+                .withFirstName("Robert")
+                .withLastName("Johnson")
+                .withEmail("robert.johnson@example.com")
+                .withCreditScore(620)
+                .withAnnualSalary(55000.0)
+                .withPhoneNumber("+1-555-0103")
+                .build();
         calculateCreditRiskScore(customer3);
         customerRepository.save(customer3);
 
-        Customer customer4 = new Customer();
-        customer4.setFirstName("Emily");
-        customer4.setLastName("Williams");
-        customer4.setEmail("emily.williams@example.com");
-        customer4.setCreditScore(800);
-        customer4.setAnnualSalary(120000.0);
+        // Using convenience method for high-value customer
+        CustomerEntity customer4 = CustomerEntityBuilder.builder()
+                .withFirstName("Emily")
+                .withLastName("Williams")
+                .withEmail("emily.williams@example.com")
+                .asHighValueCustomer()  // Sets good credit score and high salary
+                .withPhoneNumber("+1-555-0104")
+                .build();
         calculateCreditRiskScore(customer4);
         customerRepository.save(customer4);
 
-        Customer customer5 = new Customer();
-        customer5.setFirstName("Michael");
-        customer5.setLastName("Brown");
-        customer5.setEmail("michael.brown@example.com");
-        customer5.setCreditScore(550);
-        customer5.setAnnualSalary(45000.0);
+        CustomerEntity customer5 = CustomerEntityBuilder.builder()
+                .withFirstName("Michael")
+                .withLastName("Brown")
+                .withEmail("michael.brown@example.com")
+                .withCreditScore(550)
+                .withAnnualSalary(45000.0)
+                .withPhoneNumber("+1-555-0105")
+                .build();
         calculateCreditRiskScore(customer5);
         customerRepository.save(customer5);
 
-        System.out.println("Sample data initialized with 5 customers");
+        System.out.println("Sample data initialized with 5 customers using Builder pattern");
     }
     
-    private void calculateCreditRiskScore(Customer customer) {
+    private void calculateCreditRiskScore(CustomerEntity customer) {
         double creditScoreWeight = 0.7;
         double salaryWeight = 0.3;
         

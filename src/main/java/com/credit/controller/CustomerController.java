@@ -1,6 +1,8 @@
 package com.credit.controller;
 
-import com.credit.model.Customer;
+import com.credit.dto.CreateCustomerRequest;
+import com.credit.dto.UpdateCustomerRequest;
+import com.credit.dto.CustomerDTO;
 import com.credit.service.CustomerService;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,23 +24,32 @@ public class CustomerController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Customer>> getAllCustomers() {
-        return ResponseEntity.ok(customerService.getAllCustomers());
+    public ResponseEntity<List<CustomerDTO>> getAllCustomers(
+            @RequestParam(required = false) String firstName,
+            @RequestParam(required = false) String lastName,
+            @RequestParam(required = false) Integer minCreditScore,
+            @RequestParam(required = false) Integer maxCreditScore,
+            @RequestParam(required = false) Double minSalary,
+            @RequestParam(required = false) Double maxSalary) {
+        
+        List<CustomerDTO> customers = customerService.getAllCustomers(
+                firstName, lastName, minCreditScore, maxCreditScore, minSalary, maxSalary);
+        return ResponseEntity.ok(customers);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Customer> getCustomerById(@PathVariable Long id) {
+    public ResponseEntity<CustomerDTO> getCustomerById(@PathVariable Long id) {
         return ResponseEntity.ok(customerService.getCustomerById(id));
     }
 
     @PostMapping
-    public ResponseEntity<Customer> createCustomer(@Valid @RequestBody Customer customer) {
-        return new ResponseEntity<>(customerService.createCustomer(customer), HttpStatus.CREATED);
+    public ResponseEntity<CustomerDTO> createCustomer(@Valid @RequestBody CreateCustomerRequest request) {
+        return new ResponseEntity<>(customerService.createCustomer(request), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Customer> updateCustomer(@PathVariable Long id, @Valid @RequestBody Customer customer) {
-        return ResponseEntity.ok(customerService.updateCustomer(id, customer));
+    public ResponseEntity<CustomerDTO> updateCustomer(@PathVariable Long id, @Valid @RequestBody UpdateCustomerRequest request) {
+        return ResponseEntity.ok(customerService.updateCustomer(id, request));
     }
 
     @DeleteMapping("/{id}")
